@@ -38,7 +38,7 @@ Error Responses:
 
 2. Login User
 Endpoint
-POST /user/login
+POST /login
 
 Description:
 
