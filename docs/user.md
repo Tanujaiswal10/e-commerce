@@ -1,5 +1,16 @@
-# Users API Documentation
+# Table Structure
 
+CREATE TABLE users (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('ADMIN', 'CUSTOMER') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+# Users API Documentation
 This document describes all user-related APIs, including registration, login, and user retrieval.
 
 Base URL
