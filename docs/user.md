@@ -3,9 +3,12 @@
 This document describes all user-related APIs, including registration, login, and user retrieval.
 
 Base URL
-http:localhost:5050/api/v1/user
+http:localhost:5050/api/v1
 
-1. Create User / Admin
+Resource URL
+/user
+
+ ## 1. Create User / Admin
 Endpoint
 POST /create
 
@@ -36,7 +39,7 @@ or
 Error Responses:
 400 Bad Request – Missing or invalid fields
 
-2. Login User
+## 2. Login User
 Endpoint
 POST /login
 
@@ -60,7 +63,7 @@ Success Response:
 Error Responses:
 401 Unauthorized – Invalid credentials
 
-3. Get User by ID
+## 3. Get User by ID
 Endpoint
 GET /getUser/:id
 
@@ -85,7 +88,7 @@ Error Responses:
 401 Unauthorized – Token missing or invalid
 404 Not Found – User not found
 
-4. Get All Users (Admin Only)
+## 4. Get All Users (Admin Only)
 Endpoint
 GET /getAllUser
 
@@ -113,12 +116,11 @@ Success Response:
     "role": "ADMIN"
   }
 ]
-
 Error Responses:
 401 Unauthorized – Token missing or invalid
 403 Forbidden – Access denied
 
-Notes:
+## Notes:
 Passwords are stored as hashed values
 JWT is required for protected routes
 Role-based access control is enforced

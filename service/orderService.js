@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const cache = require("../utils/cache");
 
 const simulatePayment = () => {
   return Math.random() > 0.3;
@@ -57,6 +58,9 @@ exports.createOrder = async (userId, items) => {
       );
 
       await conn.commit();
+
+      cache.del(`order_${orderId}`);
+
       return { message: "Payment failed. Order cancelled." };
     }
 
@@ -66,7 +70,11 @@ exports.createOrder = async (userId, items) => {
     );
 
     await conn.commit();
+
+    cache.del(`order_${orderId}`);
+
     return { message: "Order confirmed", orderId };
+
   } catch (error) {
     await conn.rollback();
     throw error;
@@ -76,6 +84,13 @@ exports.createOrder = async (userId, items) => {
 };
 
 exports.getOrderById = async (orderId) => {
+  const cacheKey = `order_${orderId}`;
+
+  const cachedOrder = cache.get(cacheKey);
+  if (cachedOrder) {
+    return cachedOrder;
+  }
+
   const [[order]] = await db.query(
     "SELECT * FROM orders WHERE id = ?",
     [orderId]
@@ -92,7 +107,11 @@ exports.getOrderById = async (orderId) => {
     [orderId]
   );
 
-  return { ...order, items };
+  const result = { ...order, items };
+
+  cache.set(cacheKey, result, 60);
+
+  return result;
 };
 
 exports.getOrders = async (userId, page, limit, status) => {
@@ -141,6 +160,8 @@ exports.cancelOrder = async (orderId) => {
     "UPDATE orders SET status = 'CANCELLED' WHERE id = ?",
     [orderId]
   );
+
+  cache.del(`order_${orderId}`);
 
   return { message: "Order cancelled" };
 };
