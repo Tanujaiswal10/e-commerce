@@ -70,6 +70,13 @@ exports.getUserById = async (req, res) => {
       throw err;
     }
 
+    if (req.user.id !== Number(id)) {
+      const err = new Error("Access denied");
+      err.statusCode = 403;
+      throw err;
+    }
+
+
     const [[user]] = await db.query(
       "SELECT id, name, email, role FROM users WHERE id = ?",
       [id]
