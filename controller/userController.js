@@ -1,59 +1,53 @@
 const userService = require("../service/userService");
 
-exports.create = async (req, res) => {
-  try 
-  {
+exports.create = async (req, res, next) => {
+  try {
     const { name, email, password, role } = req.body;
-    if (!name || !email || !password || !role) 
-    {
-      return res.status(400).json({ message: "All fields are required" });
+
+    if (!name || !email || !password || !role) {
+      const err = new Error("All fields are required");
+      err.statusCode = 400;
+      throw err;
     }
-    const result = await userService.create(req,res);
+
+    const result = await userService.create(req, res);
     res.status(201).json(result);
-  } 
-  catch (error) 
-  {
-    res.status(400).json({ message: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.login = async (req, res) => {
-  try 
-  {
-    const { email, password } = req.body; 
-    if (!email || !password ) 
-    {
-      return res.status(400).json({ message: "All fields are required" });
-    }  
-    const result = await userService.login(req,res);
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      const err = new Error("All fields are required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const result = await userService.login(req, res);
     res.status(200).json(result);
-  } 
-  catch (error) 
-  {
-    res.status(401).json({ message: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.getUserById = async (req, res) => {
-  try 
-  {
-    const user = await userService.getUserById(req,res);
+exports.getUserById = async (req, res, next) => {
+  try {
+    const user = await userService.getUserById(req, res);
     res.status(200).json(user);
-  }
-  catch (error) 
-  {
-    res.status(404).json({ message: error.message });
+  } catch (error) {
+    next(error);
   }
 };
 
-exports.getAllUsers = async (req, res) => {
-  try 
-  {
-    const users = await userService.getAllUsers(req,res);
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await userService.getAllUsers(req, res);
     res.status(200).json(users);
-  } 
-  catch (error) 
-  {
-    res.status(403).json({ message: error.message });
+  } catch (error) {
+    next(error);
   }
 };

@@ -1,22 +1,24 @@
 require("dotenv").config();
 const express = require("express");
-const connectToDb = require('./config/db')
-const app = express();
-const port = process.env.DB_PORT;
-const route = require('./route/indexRoute')
+const connectToDb = require("./config/db");
+const errorHandler = require("./middleware/errorHandler");
 
-//middlewares
+const app = express();
+const port = process.env.PORT;
+const route = require("./route/indexRoute");
+
+// middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-//database
+// database
 connectToDb;
 
-//route 
-app.use('/api/v1',route)
+// routes
+app.use("/api/v1", route);
 
+app.use(errorHandler);
 
-app.listen(port,()=>{
-    console.log(`server running at port ${port}`)
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

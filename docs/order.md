@@ -16,10 +16,13 @@ CREATE TABLE order_items (
 
 
 # Orders API Documentation
-
 This document describes all order-related APIs including order creation, retrieval, listing with pagination, filtering, and cancellation:
 
-## Base URL
+Base URL
+http:localhost:5050/api/v1
+
+Resource URL
+/order
 
 
 All endpoints are JWT protected.
@@ -171,7 +174,7 @@ Error Responses
 
 ## Notes
 
-* Inventory stock is updated automatically
-* Stock rollback occurs on payment failure or cancellation
-* Order filtering uses query parameters
-* No direct inventory update API exists
+1. Inventory stock is updated automatically
+2. Stock rollback occurs on payment failure or cancellation
+3. Order filtering uses query parameters
+4. No direct inventory update API exists

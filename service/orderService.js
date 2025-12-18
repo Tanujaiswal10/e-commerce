@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 const simulatePayment = () => {
-  return Math.random() > 0.3; // success / failure
+  return Math.random() > 0.3;
 };
 
 exports.createOrder = async (userId, items) => {
@@ -16,7 +16,9 @@ exports.createOrder = async (userId, items) => {
       );
 
       if (!product || product.stock < item.quantity) {
-        throw new Error("Insufficient stock");
+        const err = new Error("Insufficient stock");
+        err.statusCode = 400;
+        throw err;
       }
     }
 
@@ -79,7 +81,11 @@ exports.getOrderById = async (orderId) => {
     [orderId]
   );
 
-  if (!order) throw new Error("Order not found");
+  if (!order) {
+    const err = new Error("Order not found");
+    err.statusCode = 404;
+    throw err;
+  }
 
   const [items] = await db.query(
     "SELECT inventory_id, quantity FROM order_items WHERE order_id = ?",
@@ -114,7 +120,9 @@ exports.cancelOrder = async (orderId) => {
   );
 
   if (!order || order.status === "CANCELLED") {
-    throw new Error("Order cannot be cancelled");
+    const err = new Error("Order cannot be cancelled");
+    err.statusCode = 400;
+    throw err;
   }
 
   const [items] = await db.query(

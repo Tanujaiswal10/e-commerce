@@ -27,7 +27,9 @@ exports.getProductById = async (id) => {
   );
 
   if (!product) {
-    throw new Error("Product not found");
+    const err = new Error("Product not found");
+    err.statusCode = 404;
+    throw err;
   }
 
   return product;

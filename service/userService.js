@@ -3,90 +3,96 @@ const db = require("../config/db");
 const jwt = require("jsonwebtoken");
 
 exports.create = async (req, res) => {
-try{
+  try {
     const { name, email, password, role } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
-        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-        [name, email, hashedPassword, role]
+      "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+      [name, email, hashedPassword, role]
     );
 
-    res.status(201).json({
-    message: role === "ADMIN" ? "Admin registered" : "User registered"
-    });
-} catch (error) {
-    res.status(500).json({ message: error.message });
+    return {
+      message: role === "ADMIN" ? "Admin registered" : "User registered"
+    };
+  } catch (error) {
+    error.statusCode = 500;
+    throw error;
   }
-
 };
-
-
-
 
 exports.login = async (req, res) => {
- try{
-     const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const [[user]] = await db.query(
-    "SELECT * FROM users WHERE email = ?",
-    [email]
-  );
+    const [[user]] = await db.query(
+      "SELECT * FROM users WHERE email = ?",
+      [email]
+    );
 
-  if (!user) {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }
-  );
-
-    res.json({
-    token,
-    id: user.id
-    });
- } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-exports.getUserById = async (req, res) => {
-try{
-      const { id } = req.params;
-      if (req.user.role !== "CUSTOMER") {
-      return res.status(403).json({ message: "Access denied" });
+    if (!user) {
+      const err = new Error("Invalid credentials");
+      err.statusCode = 401;
+      throw err;
     }
 
-  const [[user]] = await db.query(
-    "SELECT id, name, email, role FROM users WHERE id = ?",
-    [id]
-  );
+    const isMatch = await bcrypt.compare(password, user.password);
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
+    if (!isMatch) {
+      const err = new Error("Invalid credentials");
+      err.statusCode = 401;
+      throw err;
+    }
 
-  res.json(user);
-} catch (error) {
-    res.status(500).json({ message: error.message });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return {
+      token,
+      id: user.id
+    };
+  } catch (error) {
+    throw error;
   }
 };
 
+exports.getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== "CUSTOMER") {
+      const err = new Error("Access denied");
+      err.statusCode = 403;
+      throw err;
+    }
+
+    const [[user]] = await db.query(
+      "SELECT id, name, email, role FROM users WHERE id = ?",
+      [id]
+    );
+
+    if (!user) {
+      const err = new Error("User not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    return user;
+  } catch (error) {
+    throw error;
+  }
+};
 
 exports.getAllUsers = async (req, res) => {
   try {
     if (req.user.role !== "ADMIN") {
-      return res.status(403).json({ message: "Access denied" });
+      const err = new Error("Access denied");
+      err.statusCode = 403;
+      throw err;
     }
 
     const [users] = await db.query(
@@ -94,8 +100,8 @@ exports.getAllUsers = async (req, res) => {
       ["CUSTOMER"]
     );
 
-    res.status(200).json(users);
+    return users;
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    throw error;
   }
 };
